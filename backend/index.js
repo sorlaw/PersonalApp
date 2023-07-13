@@ -81,8 +81,6 @@ app.patch(
 
     const { nama, provinsi, kota } = req.body;
 
-    const hasil = data.find((x) => x.id == provinsi);
-
     const image = req.file.path.replace(/\\/g, "/");
     const url = `http://${baseUrl}:5000/${image}`;
 
@@ -98,7 +96,7 @@ app.patch(
       await Orang.update(
         {
           nama,
-          provinsi: hasil.name,
+          provinsi,
           kota,
           poto: image,
           url,
