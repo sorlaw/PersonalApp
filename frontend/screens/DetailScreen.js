@@ -17,12 +17,15 @@ import {
 } from "native-base";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
+import data from "../data/prov.js";
 import { SelectList } from "react-native-dropdown-select-list";
 import * as ImagePicker from "expo-image-picker";
 
 const DetailScreen = ({ route, navigation }) => {
   const { id, nama, provinsi, kota, poto } = route.params;
   const [showModal, setShowModal] = useState(false);
+
+  const hasil = data.find((x) => x.id == provinsi);
 
   const hapusOrang = () => {
     axios.delete(`http://192.168.100.138:5000/orang/${id}`);
@@ -221,7 +224,7 @@ const DetailScreen = ({ route, navigation }) => {
                   {nama}
                 </Heading>
                 <Heading size="sm" ml="-1">
-                  {provinsi}
+                  {hasil.name}
                 </Heading>
                 <Heading size="xs" ml="-1">
                   {kota}

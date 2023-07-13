@@ -47,8 +47,6 @@ app.post(
   async (req, res) => {
     const { nama, provinsi, kota } = req.body;
 
-    const hasil = data.find((x) => x.id == provinsi);
-
     const image = req.file.path.replace(/\\/g, "/");
     const url = `http://${baseUrl}:5000/${image}`;
 
@@ -58,7 +56,7 @@ app.post(
       try {
         await Orang.create({
           nama: nama,
-          provinsi: hasil.name,
+          provinsi: provinsi,
           kota: kota,
           poto: image,
           url: url,
