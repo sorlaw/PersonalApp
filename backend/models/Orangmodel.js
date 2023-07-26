@@ -8,8 +8,11 @@ const Orang = db.define(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     nama: DataTypes.STRING,
-    provinsi: DataTypes.STRING,
-    kota: DataTypes.STRING,
+    no_hp: DataTypes.STRING,
+    gender: DataTypes.STRING,
+    jenjang: DataTypes.STRING,
+    hobi: DataTypes.STRING,
+    alamat: DataTypes.STRING,
     poto: DataTypes.STRING,
     url: DataTypes.STRING,
   },

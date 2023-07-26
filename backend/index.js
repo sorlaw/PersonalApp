@@ -9,7 +9,7 @@ import data from "./controller/prov.js";
 import Orang from "./models/Orangmodel.js";
 import fs from "fs";
 
-const baseUrl = `192.168.100.138`;
+const baseUrl = `192.168.43.197`;
 
 const app = express();
 
@@ -45,7 +45,7 @@ app.post(
   "/orang",
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("file"),
   async (req, res) => {
-    const { nama, provinsi, kota } = req.body;
+    const { nama, nohp, gender, jenjang, hobi, alamat } = req.body;
 
     const image = req.file.path.replace(/\\/g, "/");
     const url = `http://${baseUrl}:5000/${image}`;
@@ -56,8 +56,11 @@ app.post(
       try {
         await Orang.create({
           nama: nama,
-          provinsi: provinsi,
-          kota: kota,
+          no_hp: nohp,
+          gender: gender,
+          jenjang: jenjang,
+          hobi: hobi,
+          alamat: alamat,
           poto: image,
           url: url,
         });
@@ -79,7 +82,7 @@ app.patch(
     });
     if (!orang) return res.status(404).json({ msg: "not found" });
 
-    const { nama, provinsi, kota } = req.body;
+    const { nama, nohp, gender, jenjang, hobi, alamat } = req.body;
 
     const image = req.file.path.replace(/\\/g, "/");
     const url = `http://${baseUrl}:5000/${image}`;
@@ -95,11 +98,14 @@ app.patch(
     try {
       await Orang.update(
         {
-          nama,
-          provinsi,
-          kota,
+          nama: nama,
+          no_hp: nohp,
+          gender: gender,
+          jenjang: jenjang,
+          hobi: hobi,
+          alamat: alamat,
           poto: image,
-          url,
+          url: url,
         },
         {
           where: {

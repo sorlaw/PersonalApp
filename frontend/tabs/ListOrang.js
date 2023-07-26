@@ -15,7 +15,7 @@ const ListOrang = ({ navigation }) => {
   const [orang, setOrang] = useState([]);
   const getOrang = async () => {
     try {
-      const response = await axios.get("http://192.168.100.138:5000/orang");
+      const response = await axios.get("http://192.168.43.197:5000/orang");
       setOrang(response.data);
     } catch (err) {
       console.log(err);
@@ -24,7 +24,7 @@ const ListOrang = ({ navigation }) => {
 
   useEffect(() => {
     getOrang();
-  }, []);
+  }, [orang]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -32,9 +32,12 @@ const ListOrang = ({ navigation }) => {
         navigation.navigate("Detail", {
           id: item.id,
           nama: item.nama,
-          provinsi: item.provinsi,
-          kota: item.kota,
+          nohp: item.no_hp,
+          gender: item.gender,
+          jenjang: item.jenjang,
+          hobi: item.hobi,
           poto: item.url,
+          alamat: item.alamat,
         })
       }
     >

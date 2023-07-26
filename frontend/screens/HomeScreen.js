@@ -21,11 +21,15 @@ import {
   FormControl,
   Button,
   ScrollView,
+  Radio,
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
-import { SelectList } from "react-native-dropdown-select-list";
+import {
+  SelectList,
+  MultipleSelectList,
+} from "react-native-dropdown-select-list";
 import * as ImagePicker from "expo-image-picker";
 import { debounce } from "lodash";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -47,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
   const findOrang = async (val) => {
     try {
       const response = await axios.get(
-        `http://192.168.100.138:5000/orang/api/${val}`
+        `http://192.168.43.197:5000/orang/api/${val}`
       );
       setCariOrang(response.data);
     } catch (err) {
@@ -64,18 +68,7 @@ const HomeScreen = ({ navigation }) => {
     handleSearch(text);
   };
 
-  useEffect(() => {
-    getOrang();
-  }, []);
-
-  const getOrang = async () => {
-    try {
-      const response = await axios.get("http://192.168.100.138:5000/orang");
-      setOrang(response.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  useEffect(() => {}, []);
 
   const handleFocus = () => {
     setIsFocused(true);
@@ -85,82 +78,48 @@ const HomeScreen = ({ navigation }) => {
     setIsFocused(false);
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate("Detail", {
-          id: item.id,
-          nama: item.nama,
-          provinsi: item.provinsi,
-          kota: item.kota,
-          poto: item.url,
-        })
-      }
-    >
-      <Box
-        borderWidth="1"
-        _dark={{
-          borderColor: "muted.50",
-        }}
-        borderColor="muted.800"
-        pl={["2", "4"]}
-        pr={["2", "5"]}
-        py="2"
-        borderRadius="md"
-        mb="3"
-      >
-        <HStack>
-          <VStack marginRight="4">
-            <Avatar
-              bg="green.500"
-              source={{
-                uri: item.url,
-              }}
-            >
-              AJ
-            </Avatar>
-          </VStack>
-
-          <Text
-            fontSize="md"
-            _dark={{
-              color: "warmGray.50",
-            }}
-            color="coolGray.800"
-            alignSelf="center"
-          >
-            {item.nama}
-          </Text>
-        </HStack>
-      </Box>
-    </TouchableOpacity>
-  );
-
   const ModalAdd = () => {
     const [nama, setNama] = useState("");
-    const [prov, setProv] = useState([]);
-    const [kota, setKota] = useState([]);
-    const [selectProv, setSelectProv] = useState("");
-    const [selectKota, setSelectKota] = useState("");
     const [image, setImage] = useState(null);
+    const [gender, setGender] = useState("");
+    const [nohp, setNohp] = useState("");
+    const [jenjang, setJenjang] = useState(null);
+    const [hobi, setHobi] = useState([]);
+    const [alamat, setAlamat] = useState("");
+
+    const dataJenjang = [
+      { key: "1", value: "SD" },
+      { key: "2", value: "SMP" },
+      { key: "3", value: "SMA" },
+    ];
+    const dataHobi = [
+      { key: "1", value: "Membaca" },
+      { key: "2", value: "Menulis" },
+      { key: "3", value: "Menggambar" },
+    ];
 
     const saveOrang = () => {
-      const fileName = image.uri.split("/").pop();
-      const fileType = fileName.split(".").pop();
       let formData = new FormData();
-      if (!image) {
+      if (image === null) {
         alert("Image Harus di Upload");
       } else {
+        const allHobi = hobi.toString();
+        const fileName = image.uri.split("/").pop();
+        const fileType = fileName.split(".").pop();
         formData.append("nama", nama);
-        formData.append("provinsi", selectProv);
-        formData.append("kota", selectKota);
+        formData.append("nohp", nohp);
+        formData.append("gender", gender);
+        formData.append("jenjang", jenjang);
+        formData.append("hobi", allHobi);
+
         formData.append("file", {
           uri: image.uri,
           name: fileName,
           type: "image/" + fileType,
         });
+        formData.append("alamat", alamat);
       }
-      fetch("http://192.168.100.138:5000/orang", {
+      fetch("http://192.168.43.197:5000/orang", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -168,11 +127,28 @@ const HomeScreen = ({ navigation }) => {
         body: formData,
       });
       alert("Data telah dimasukkan");
-      setNama("");
-      setSelectProv("");
-      setSelectKota("");
-      setImage(null);
+      // setShowModal(false);
     };
+
+    // const getData = async () => {
+    //   try {
+    //     const myArr = [];
+    //     const response = await axios.get(
+    //       "https://personal-app-16754-default-rtdb.firebaseio.com/users.json"
+    //     );
+    //     const arrObject = response.data;
+    //     for (const key in arrObject) {
+    //       if (arrObject.hasOwnProperty.call(arrObject, key)) {
+    //         const element = arrObject[key];
+
+    //         myArr.push({ id: key, ...element });
+    //       }
+    //     }
+    //     console.log(myArr);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // };
 
     const pickImage = async () => {
       // No permissions request is necessary for launching the image library
@@ -189,71 +165,58 @@ const HomeScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
-      fetchProv();
-      if (selectProv != "") {
-        fetchKota(selectProv);
-      }
-    }, [selectProv]);
-
-    const fetchProv = async () => {
-      try {
-        const response = await axios.get(
-          "https://sorlaw.github.io/api-wilayah-indonesia/api/provinces.json"
-        );
-        setProv(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    const fetchKota = async (id) => {
-      try {
-        const response = await axios.get(
-          `https://sorlaw.github.io/api-wilayah-indonesia/api/regencies/${id}.json`
-        );
-        setKota(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    const dataProv = prov.map((item) => {
-      return {
-        key: item.id,
-        value: item.name,
-      };
-    });
-    const dataKota = kota.map((item) => {
-      return {
-        key: item.id,
-        value: item.name,
-      };
-    });
+      // getData();
+    }, []);
 
     return (
       <Center>
         <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
           <Modal.Content maxWidth="400px">
             <Modal.CloseButton />
-            <Modal.Header>Tambah orang</Modal.Header>
+            <Modal.Header>Tambah siswa</Modal.Header>
             <Modal.Body>
               <FormControl>
                 <FormControl.Label>Nama Lengkap</FormControl.Label>
                 <Input onChangeText={setNama} />
               </FormControl>
-              <FormControl mt="3">
-                <FormControl.Label>Provinsi</FormControl.Label>
+              <FormControl>
+                <FormControl.Label>No hp</FormControl.Label>
+                <Input onChangeText={setNohp} />
+              </FormControl>
+
+              <FormControl>
+                <FormControl.Label>Gender</FormControl.Label>
+                <Radio.Group
+                  name="myRadioGroup"
+                  value={gender}
+                  onChange={(nextValue) => {
+                    setGender(nextValue);
+                  }}
+                >
+                  <Radio value="Pria" my="1">
+                    Pria
+                  </Radio>
+                  <Radio value="Wanita" my="1">
+                    Wanita
+                  </Radio>
+                </Radio.Group>
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>Jenjang</FormControl.Label>
                 <SelectList
-                  setSelected={(val) => setSelectProv(val)}
-                  data={dataProv}
-                  save="key"
+                  setSelected={(val) => setJenjang(val)}
+                  data={dataJenjang}
+                  save="value"
                 />
               </FormControl>
-              <FormControl mt="3">
-                <FormControl.Label>Kota</FormControl.Label>
-                <SelectList
-                  setSelected={(val) => setSelectKota(val)}
-                  data={dataKota}
+              <FormControl>
+                <FormControl.Label>Hobi</FormControl.Label>
+                <MultipleSelectList
+                  setSelected={(val) => setHobi(val)}
+                  data={dataHobi}
                   save="value"
+                  onSelect={() => alert(hobi)}
+                  label="Categories"
                 />
               </FormControl>
               <FormControl mt="3">
@@ -267,6 +230,10 @@ const HomeScreen = ({ navigation }) => {
                     />
                   </Center>
                 )}
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>Alamat</FormControl.Label>
+                <Input onChangeText={setAlamat} />
               </FormControl>
             </Modal.Body>
             <Modal.Footer>

@@ -29,7 +29,7 @@ const HomeScreen = ({ navigation }) => {
   const checkLogin = async () => {
     try {
       const response = await axios.post(
-        `http://192.168.100.138:5000/api/data/user`,
+        `http://192.168.43.197:5000/api/data/user`,
         {
           username,
           password,

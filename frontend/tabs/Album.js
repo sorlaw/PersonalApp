@@ -8,7 +8,7 @@ const Album = ({ navigation }) => {
 
   useEffect(() => {
     getOrang();
-  }, []);
+  }, [orang]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -32,7 +32,7 @@ const Album = ({ navigation }) => {
 
   const getOrang = async () => {
     try {
-      const response = await axios.get("http://192.168.100.138:5000/orang");
+      const response = await axios.get("http://192.168.43.197:5000/orang");
       setOrang(response.data);
     } catch (err) {
       console.log(err);

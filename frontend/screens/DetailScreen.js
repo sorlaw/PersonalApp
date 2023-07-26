@@ -14,61 +14,82 @@ import {
   FormControl,
   Button,
   Input,
+  Radio,
 } from "native-base";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
-import data from "../data/prov.js";
-import { SelectList } from "react-native-dropdown-select-list";
+import {
+  SelectList,
+  MultipleSelectList,
+} from "react-native-dropdown-select-list";
 import * as ImagePicker from "expo-image-picker";
 
 const DetailScreen = ({ route, navigation }) => {
-  const { id, nama, provinsi, kota, poto } = route.params;
+  const { id, nama, nohp, gender, jenjang, hobi, alamat, poto } = route.params;
   const [showModal, setShowModal] = useState(false);
-
-  const hasil = data.find((x) => x.id == provinsi);
+  const tes = "jeka";
 
   const hapusOrang = () => {
-    axios.delete(`http://192.168.100.138:5000/orang/${id}`);
+    axios.delete(`http://192.168.43.197:5000/orang/${id}`);
     alert("Data terhapus");
     navigation.goBack();
   };
 
-  const ModalUpdate = () => {
-    const [nama, setNama] = useState("");
-    const [prov, setProv] = useState([]);
-    const [kota, setKota] = useState([]);
-    const [selectProv, setSelectProv] = useState("");
-    const [selectKota, setSelectKota] = useState("");
+  const ModalUpdate = ({ name, jk, noHp, jenJang, hoBi, alaMat, gamBar }) => {
+    const [nama, setNama] = useState(name);
+    const [gender, setGender] = useState(jk);
+    const [nohp, setNohp] = useState(noHp);
+    const [jenjang, setJenjang] = useState(jenJang);
+    const [hobi, setHobi] = useState([]);
+    const [alamat, setAlamat] = useState(alaMat);
     const [image, setImage] = useState(null);
 
-    const updateOrang = () => {
+    const dataJenjang = [
+      { key: "1", value: "SD" },
+      { key: "2", value: "SMP" },
+      { key: "3", value: "SMA" },
+    ];
+    const dataHobi = [
+      { key: "1", value: "Membaca" },
+      { key: "2", value: "Menulis" },
+      { key: "3", value: "Menggambar" },
+    ];
+
+    const updateOrang = ({ navigation }) => {
       const fileName = image.uri.split("/").pop();
       const fileType = fileName.split(".").pop();
+      const allHobi = hobi.toString();
       let formData = new FormData();
       if (!image) {
         alert("Image Harus di Upload");
       } else {
         formData.append("nama", nama);
-        formData.append("provinsi", selectProv);
-        formData.append("kota", selectKota);
+        formData.append("nohp", nohp);
+        formData.append("gender", gender);
+        formData.append("jenjang", jenjang);
+        formData.append("hobi", allHobi);
         formData.append("file", {
           uri: image.uri,
           name: fileName,
           type: "image/" + fileType,
         });
+        formData.append("alamat", alamat);
       }
-      fetch(`http://192.168.100.138:5000/orang/${id}`, {
+      fetch(`http://192.168.43.197:5000/orang/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "multipart/form-data",
         },
         body: formData,
       });
-      alert("Data telah dimasukkan");
+      alert("Data telah update");
       setNama("");
-      setSelectProv("");
-      setSelectKota("");
+      setGender("");
+      setNohp("");
+      setHobi([]);
+      setJenjang("");
       setImage(null);
+      setAlamat("");
     };
 
     const pickImage = async () => {
@@ -85,78 +106,73 @@ const DetailScreen = ({ route, navigation }) => {
       }
     };
 
-    useEffect(() => {
-      fetchProv();
-      if (selectProv != "") {
-        fetchKota(selectProv);
-      }
-    }, [selectProv]);
-
-    const fetchProv = async () => {
-      try {
-        const response = await axios.get(
-          "https://sorlaw.github.io/api-wilayah-indonesia/api/provinces.json"
-        );
-        setProv(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    const fetchKota = async (id) => {
-      try {
-        const response = await axios.get(
-          `https://sorlaw.github.io/api-wilayah-indonesia/api/regencies/${id}.json`
-        );
-        setKota(response.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    const dataProv = prov.map((item) => {
-      return {
-        key: item.id,
-        value: item.name,
-      };
-    });
-    const dataKota = kota.map((item) => {
-      return {
-        key: item.id,
-        value: item.name,
-      };
-    });
+    useEffect(() => {}, []);
 
     return (
       <Center>
         <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
           <Modal.Content maxWidth="400px">
             <Modal.CloseButton />
-            <Modal.Header>Update orang</Modal.Header>
+            <Modal.Header>Update Siswa</Modal.Header>
             <Modal.Body>
               <FormControl>
                 <FormControl.Label>Nama Lengkap</FormControl.Label>
-                <Input onChangeText={setNama} />
+                <Input onChangeText={setNama} value={nama} />
               </FormControl>
-              <FormControl mt="3">
-                <FormControl.Label>Provinsi</FormControl.Label>
+              <FormControl>
+                <FormControl.Label>No hp</FormControl.Label>
+                <Input onChangeText={setNohp} value={nohp} />
+              </FormControl>
+
+              <FormControl>
+                <FormControl.Label>Gender</FormControl.Label>
+                <Radio.Group
+                  name="myRadioGroup"
+                  value={gender}
+                  onChange={(nextValue) => {
+                    setGender(nextValue);
+                  }}
+                >
+                  <Radio value="Pria" my="1">
+                    Pria
+                  </Radio>
+                  <Radio value="Wanita" my="1">
+                    Wanita
+                  </Radio>
+                </Radio.Group>
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>Jenjang</FormControl.Label>
                 <SelectList
-                  setSelected={(val) => setSelectProv(val)}
-                  data={dataProv}
-                  save="key"
+                  setSelected={(val) => setJenjang(val)}
+                  data={dataJenjang}
+                  save="value"
+                  defaultOption={dataJenjang.find(
+                    ({ value }) => value == jenjang
+                  )}
                 />
               </FormControl>
-              <FormControl mt="3">
-                <FormControl.Label>Kota</FormControl.Label>
-                <SelectList
-                  setSelected={(val) => setSelectKota(val)}
-                  data={dataKota}
+              <FormControl>
+                <FormControl.Label>Hobi</FormControl.Label>
+                <MultipleSelectList
+                  setSelected={(val) => setHobi(val)}
+                  data={dataHobi}
                   save="value"
+                  onSelect={() => alert(hobi)}
+                  label="Categories"
                 />
               </FormControl>
               <FormControl mt="3">
                 <FormControl.Label>Masukkan foto</FormControl.Label>
                 <Button onPress={pickImage}>Pilih gambar</Button>
-                {image && (
+                {!image ? (
+                  <Center mt="3">
+                    <Image
+                      source={{ uri: gamBar }}
+                      style={{ width: 230, height: 200 }}
+                    />
+                  </Center>
+                ) : (
                   <Center mt="3">
                     <Image
                       source={{ uri: image.uri }}
@@ -164,6 +180,10 @@ const DetailScreen = ({ route, navigation }) => {
                     />
                   </Center>
                 )}
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>Alamat</FormControl.Label>
+                <Input onChangeText={setAlamat} value={alamat} />
               </FormControl>
             </Modal.Body>
             <Modal.Footer>
@@ -220,20 +240,54 @@ const DetailScreen = ({ route, navigation }) => {
             </Box>
             <Stack p="4" space={3}>
               <Stack space={2}>
-                <Heading size="md" ml="-1">
+                <Heading size="xs" ml="-1">
+                  Nama
+                </Heading>
+                <Heading size="sm" ml="-1" fontSize={18}>
                   {nama}
                 </Heading>
-                <Heading size="sm" ml="-1">
-                  {hasil.name}
+                <Heading size="xs" ml="-1">
+                  No Hp
+                </Heading>
+                <Heading size="sm" ml="-1" fontSize={18}>
+                  {nohp}
                 </Heading>
                 <Heading size="xs" ml="-1">
-                  {kota}
+                  Gender
+                </Heading>
+                <Heading size="sm" ml="-1" fontSize={18}>
+                  {gender}
+                </Heading>
+                <Heading size="xs" ml="-1">
+                  Jenjang
+                </Heading>
+                <Heading size="sm" ml="-1" fontSize={18}>
+                  {jenjang}
+                </Heading>
+                <Heading size="xs" ml="-1">
+                  Hobi
+                </Heading>
+                <Heading size="sm" ml="-1" fontSize={18}>
+                  {hobi}
+                </Heading>
+                <Heading size="xs" ml="-1">
+                  Alamat
+                </Heading>
+                <Heading size="sm" ml="-1" fontSize={18}>
+                  {alamat}
                 </Heading>
               </Stack>
             </Stack>
           </Box>
         </Box>
-        <ModalUpdate />
+        <ModalUpdate
+          name={nama}
+          jk={gender}
+          noHp={nohp}
+          alaMat={alamat}
+          jenJang={jenjang}
+          gamBar={poto}
+        />
         <View className="flex self-start flex-row w-20 justify-evenly mx-5 my-1">
           <TouchableOpacity onPress={hapusOrang}>
             <FontAwesome name="trash" size={32} color="red" />

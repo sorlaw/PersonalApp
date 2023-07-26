@@ -20,7 +20,7 @@ const SignUpScreen = ({ navigation }) => {
 
   const addUser = async () => {
     try {
-      await axios.post(`http://192.168.100.138:5000/api/data/adduser`, {
+      await axios.post(`http://192.168.43.197:5000/api/data/adduser`, {
         nama,
         username,
         password,
